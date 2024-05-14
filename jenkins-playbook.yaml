@@ -1,0 +1,46 @@
+---
+- name: Install Java, Maven, and Jenkins
+  hosts: jenkins
+  become: true
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install OpenJDK
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: Install Maven
+      apt:
+        name: maven
+        state: present
+
+    - name: Download Jenkins repository key
+      get_url:
+        url: "https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key"
+        dest: "/usr/share/keyrings/jenkins-keyring.asc"
+        mode: '0644'
+
+    - name: Add Jenkins repository to sources.list.d
+      lineinfile:
+        path: "/etc/apt/sources.list.d/jenkins.list"
+        line: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
+        create: yes
+
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
