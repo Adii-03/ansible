@@ -1,0 +1,105 @@
+---
+- name: Install Kubernetes on Ubuntu
+  hosts: kubernetes
+  become: yes
+  tasks:
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+
+    - name: Install apt-transport-https, ca-certificates, curl, and gpg
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg
+
+    - name: Download Kubernetes GPG key
+      get_url:
+        url: "https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key"
+        dest: "/etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+        mode: "0644"
+
+    - name: Add Kubernetes repository to Apt sources
+      lineinfile:
+        path: "/etc/apt/sources.list.d/kubernetes.list"
+        line: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
+        create: yes
+
+    - name: Update apt packages again
+      apt:
+        update_cache: yes
+
+    - name: Install kubelet, kubeadm, kubectl
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Mark kubelet, kubeadm, kubectl as held packages
+      apt_mark:
+        name: "{{ item }}"
+        state: hold
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+
+
+    - name: Update apt packages
+      apt:
+        update_cache: yes
+
+    - name: Install necessary packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Add Kubernetes apt key
+      apt_key:
+        url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+        state: present
+
+    - name: Install Kubernetes components
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Initialize Kubernetes cluster
+      command: kubeadm init --apiserver-advertise-address=172.31.121.37
+      register: kubeadm_output
+      ignore_errors: yes
+
+    - name: Set up kubeconfig for the current user
+      command: "{{ item }}"
+      with_items:
+        - mkdir -p $HOME/.kube
+        - cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        - chown $(id -u):$(id -g) $HOME/.kube/config
+      when: kubeadm_output is succeeded
+
+    - name: Install a pod network add-on (e.g., Calico)
+      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      when: kubeadm_output is succeeded
+
