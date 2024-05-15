@@ -53,7 +53,7 @@
       become: yes
 
     - name: Set SystemdCgroup property in Containerd config
-      ansible.builtin.shell: sudo containerd config default > /etc/containerd/config.toml
+      ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
       args:
         creates: /etc/containerd/config.toml
       become: yes
@@ -82,13 +82,24 @@
       become: yes
 
     - name: Initialize Kubernetes cluster
-      command: kubeadm init --apiserver-advertise-address=172.31.121.37
+      command: kubeadm init --apiserver-advertise-address=10.0.0.5
       register: kubeadm_output
       ignore_errors: yes
       when: not kubeconf.stat.exists
       become: yes
 
+    - name: Setup Kubeconfig for the current user
+      shell: |
+        mkdir -p $HOME/.kube
+        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+      args:
+        creates: $HOME/.kube/config
+
     - name: Install a pod network add-on (e.g., Calico)
       command: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
       when: kubeadm_output is succeeded
 
+    - name: Allow the control-plane node to run containers
+      command: kubectl taint node idop-vm-02 node-role.kubernetes.io/control-plane:NoSchedule-
+      when: kubeadm_output is succeeded

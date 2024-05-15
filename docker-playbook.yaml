@@ -57,6 +57,6 @@
 
     - name: Add user to Docker group
       user:
-        name: "cloud_user"
+        name: "rootadmin"
         groups: docker
         append: yes
