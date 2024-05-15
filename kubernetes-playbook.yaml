@@ -59,11 +59,15 @@
       become: yes
 
     - name: Modify SystemdCgroup property in Containerd config
-      lineinfile:
+      ansible.builtin.replace:
         path: /etc/containerd/config.toml
-        regexp: '^(\s*SystemdCgroup\s*=\s*)(.*)$'
-        line: '\1true'
+        regexp: '^(\s*SystemdCgroup\s*=\s*)false$'
+        replace: '\1true'
       become: yes
+      register: lineinfile_result
+
+    - debug:
+        var: lineinfile_result
 
     - name: Restart Containerd service
       systemd:
