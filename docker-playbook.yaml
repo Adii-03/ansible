@@ -1,6 +1,6 @@
 ---
 - name: Install Docker on Ubuntu
-  hosts: kubernetes
+  hosts: all
   become: yes
   tasks:
     - name: Add Docker's official GPG key
@@ -50,3 +50,13 @@
         - docker-buildx-plugin
         - docker-compose-plugin
 
+    - name: Create Docker group
+      group:
+        name: docker
+        state: present
+
+    - name: Add user to Docker group
+      user:
+        name: "cloud_user"
+        groups: docker
+        append: yes

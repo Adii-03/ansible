@@ -1,11 +1,11 @@
 ---
 - name: Install Kubernetes on Ubuntu
   hosts: kubernetes
-  become: yes
   tasks:
     - name: Update apt packages
       apt:
         update_cache: yes
+      become: yes
 
     - name: Install apt-transport-https, ca-certificates, curl, and gpg
       apt:
@@ -16,22 +16,31 @@
         - ca-certificates
         - curl
         - gnupg
+      become: yes
+
+    - name: Check if Kubernetes GPG key exists
+      stat:
+        path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      register: gpg_key_exists
+      become: yes
 
     - name: Download Kubernetes GPG key
-      get_url:
-        url: "https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key"
-        dest: "/etc/apt/keyrings/kubernetes-apt-keyring.gpg"
-        mode: "0644"
-
+      shell: |
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      become: yes
+      when: not gpg_key_exists.stat.exists
+      
     - name: Add Kubernetes repository to Apt sources
       lineinfile:
         path: "/etc/apt/sources.list.d/kubernetes.list"
         line: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /"
         create: yes
+      become: yes
 
     - name: Update apt packages again
       apt:
         update_cache: yes
+      become: yes
 
     - name: Install kubelet, kubeadm, kubectl
       apt:
@@ -41,65 +50,41 @@
         - kubelet
         - kubeadm
         - kubectl
+      become: yes
 
-    - name: Mark kubelet, kubeadm, kubectl as held packages
-      apt_mark:
-        name: "{{ item }}"
-        state: hold
-      with_items:
-        - kubelet
-        - kubeadm
-        - kubectl
+    - name: Set SystemdCgroup property in Containerd config
+      ansible.builtin.shell: sudo containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+      become: yes
 
+    - name: Modify SystemdCgroup property in Containerd config
+      lineinfile:
+        path: /etc/containerd/config.toml
+        regexp: '^(\s*SystemdCgroup\s*=\s*)(.*)$'
+        line: '\1true'
+      become: yes
 
+    - name: Restart Containerd service
+      systemd:
+        name: containerd
+        state: restarted
+      become: yes
 
-    - name: Update apt packages
-      apt:
-        update_cache: yes
-
-    - name: Install necessary packages
-      apt:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - software-properties-common
-
-    - name: Add Kubernetes apt key
-      apt_key:
-        url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
-        state: present
-
-    - name: Add Kubernetes repository
-      apt_repository:
-        repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-        state: present
-
-    - name: Install Kubernetes components
-      apt:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - kubelet
-        - kubeadm
-        - kubectl
+    - name: Check if Kubernetes GPG key exists
+      stat:
+        path: /etc/kubernetes/kubelet.conf
+      register: kubeconf
+      become: yes
 
     - name: Initialize Kubernetes cluster
       command: kubeadm init --apiserver-advertise-address=172.31.121.37
       register: kubeadm_output
       ignore_errors: yes
-
-    - name: Set up kubeconfig for the current user
-      command: "{{ item }}"
-      with_items:
-        - mkdir -p $HOME/.kube
-        - cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-        - chown $(id -u):$(id -g) $HOME/.kube/config
-      when: kubeadm_output is succeeded
+      when: not kubeconf.stat.exists
+      become: yes
 
     - name: Install a pod network add-on (e.g., Calico)
-      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      command: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
       when: kubeadm_output is succeeded
 
