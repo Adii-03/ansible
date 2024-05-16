@@ -7,37 +7,41 @@ pipeline {
   stages {
     stage('Checkout Source') {
       steps {
-        git('https://github.com/Adii-03/ansible.git', branch: 'main')
+        git(url: 'https://github.com/Adii-03/ansible.git', branch: 'main')
       }
     }
     stage('Build image') {
-      steps{
-        script {
-          dockerImage = docker.build(dockerimagename, "./spring-boot-microservices/discovery-server/")
+        steps{
+            dir("spring-boot-microservices/discovery-server") {
+                script {
+                    sh "mvn clean install"
+                    dockerImage = docker.build(dockerimagename)
+                }
+            }
         }
-      }
     }
     stage('Pushing Image') {
-      environment {
-          registryCredential = 'docker-hub'
-           }
-      steps{
-        script {
-          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-            dockerImage.push()
-          }
+        environment {
+            registryCredential = 'docker-hub'
         }
-      }
+        steps{
+            script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                dockerImage.push()
+                }
+            }
+        }
     }
     stage('Deploying the container to Kubernetes') {
-      steps {
-        script {
-       withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
-        sh 'kubectl apply -f spring-boot-microservices/discovery-server/manifest.yaml'
-      }
-
-      }
+        steps {
+            dir("spring-boot-microservices/discovery-server") {
+                script {
+                    withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
     }
   }
-}
 }
