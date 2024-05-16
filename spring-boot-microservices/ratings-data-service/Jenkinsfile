@@ -1,6 +1,6 @@
 pipeline {
   environment {
-    dockerimagename = "adrika1203/movie-catalog-service:1.0"
+    dockerimagename = "adrika1203/ratings-data-service:1.0"
     dockerImage = ""
   }
   agent any
@@ -12,7 +12,7 @@ pipeline {
     }
     stage('Build image') {
         steps{
-            dir("spring-boot-microservices/movie-catalog-service") {
+            dir("spring-boot-microservices/ratings-data-service") {
                 script {
                     sh "mvn clean install"
                     dockerImage = docker.build(dockerimagename)
@@ -34,7 +34,7 @@ pipeline {
     }
     stage('Deploying the container to Kubernetes') {
         steps {
-            dir("spring-boot-microservices/movie-catalog-service") {
+            dir("spring-boot-microservices/ratings-data-service") {
                 script {
                     withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
                         sh 'kubectl apply -f manifest.yaml'
