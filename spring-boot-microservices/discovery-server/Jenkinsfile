@@ -13,7 +13,7 @@ pipeline {
     stage('Build image') {
       steps{
         script {
-          dockerImage = docker.build dockerimagename
+          dockerImage = docker.build(dockerimagename, "./spring-boot-microservices/discovery-server/")
         }
       }
     }
@@ -32,8 +32,10 @@ pipeline {
     stage('Deploying the container to Kubernetes') {
       steps {
         script {
-          kubernetesDeploy(configs: "manifest.yaml")
-        }
+       withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+        sh 'kubectl apply -f spring-boot-microservices/discovery-server/manifest.yaml'
+      }
+
       }
     }
   }
