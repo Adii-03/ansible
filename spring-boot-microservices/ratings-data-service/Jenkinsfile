@@ -1,0 +1,48 @@
+pipeline {
+  environment {
+    dockerimagename = "adrika1203/movie-catalog-service:1.0"
+    dockerImage = ""
+  }
+  agent any
+  stages {
+    stage('Checkout Source') {
+      steps {
+        git(url: 'https://github.com/Adii-03/ansible.git', branch: 'main')
+      }
+    }
+    stage('Build image') {
+        steps{
+            dir("spring-boot-microservices/movie-catalog-service") {
+                script {
+                    sh "mvn clean install"
+                    dockerImage = docker.build(dockerimagename)
+                }
+            }
+        }
+    }
+    stage('Pushing Image') {
+        environment {
+            registryCredential = 'docker-hub'
+        }
+        steps{
+            script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                dockerImage.push()
+                }
+            }
+        }
+    }
+    stage('Deploying the container to Kubernetes') {
+        steps {
+            dir("spring-boot-microservices/movie-catalog-service") {
+                script {
+                    withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
+    }
+  }
+
+

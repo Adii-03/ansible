@@ -1,0 +1,114 @@
+Script started on 2024-05-16 11:18:10+00:00 [TERM="xterm" TTY="/dev/pts/3" COLUMNS="173" LINES="48"]
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                dockerImage.push()
+                }
+            }
+        }
+    }
+    stage('Deploying the container to Kubernetes') {
+        steps {
+            dir("spring-boot-microservices/discovery-server") {
+                script {
+                    withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
+    }
+  }
+}
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+bash: syntax error near unexpected token `'https://registry.hub.docker.com','
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 dockerImage.push()
+>                 }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$             }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$         }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$     }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$     stage('Deploying the container to Kubernetes') {
+bash: syntax error near unexpected token `'Deploying the container to Kubernetes''
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$         steps {
+
+Command 'steps' not found, did you mean:
+
+  command 'step' from snap step (23.08.4)
+  command 'step' from deb step (4:19.12.3-0ubuntu1)
+
+See 'snap info <snapname>' for additional versions.
+
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$             dir("spring-boot-microservices/discovery-server") {
+bash: syntax error near unexpected token `"spring-boot-microservices/discovery-server"'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 script {
+Script started, file is {
+                    withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
+    }
+  }
+}
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                     withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+bash: syntax error near unexpected token `[credentialsId:'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                         sh 'kubectl apply -f manifest.yaml'
+sh: 0: Can't open kubectl apply -f manifest.yaml
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
+    }
+  }
+}
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+bash: syntax error near unexpected token `'https://registry.hub.docker.com','
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 dockerImage.push()
+>                 }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$             }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$         }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$     }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$     stage('Deploying the container to Kubernetes') {
+bash: syntax error near unexpected token `'Deploying the container to Kubernetes''
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$         steps {
+
+Command 'steps' not found, did you mean:
+
+  command 'step' from snap step (23.08.4)
+  command 'step' from deb step (4:19.12.3-0ubuntu1)
+
+See 'snap info <snapname>' for additional versions.
+
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$             dir("spring-boot-microservices/discovery-server") {
+bash: syntax error near unexpected token `"spring-boot-microservices/discovery-server"'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 script {
+Script started, file is {
+                    withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+                        sh 'kubectl apply -f manifest.yaml'
+                    }
+                }
+            }
+        }
+    }
+  }
+}
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                     withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
+bash: syntax error near unexpected token `[credentialsId:'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                         sh 'kubectl apply -f manifest.yaml'
+sh: 0: Can't open kubectl apply -f manifest.yaml
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                     }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$                 }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01: ~/ansible/spring-boot-microservices/discovery-serverrootadmin@idop-vm-01:~/ansible/spring-boot-microservices/discovery-server$             }
+bash: syntax error near unexpected token `}'
+]0;rootadmin@idop-vm-01:
