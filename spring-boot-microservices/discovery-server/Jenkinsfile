@@ -1,0 +1,40 @@
+pipeline {
+  environment {
+    dockerimagename = "adrika1203/discovery-server:1.0"
+    dockerImage = ""
+  }
+  agent any
+  stages {
+    stage('Checkout Source') {
+      steps {
+        git 'https://github.com/Adii-03/ansible.git'
+      }
+    }
+    stage('Build image') {
+      steps{
+        script {
+          dockerImage = docker.build dockerimagename
+        }
+      }
+    }
+    stage('Pushing Image') {
+      environment {
+          registryCredential = 'docker-hub'
+           }
+      steps{
+        script {
+          docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+    stage('Deploying the container to Kubernetes') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "manifest.yaml")
+        }
+      }
+    }
+  }
+}
