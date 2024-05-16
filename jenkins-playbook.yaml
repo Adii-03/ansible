@@ -3,10 +3,12 @@
   hosts: jenkins
   become: true
   tasks:
+    # This task ensures that the APT package cache is up to date on the target system, which is an important step before installing or upgrading packages using APT.
     - name: Update apt package cache
       apt:
         update_cache: yes
 
+    # This run apt install openjdk-11-jdk command on the target system and installs openjdk on the system
     - name: Install OpenJDK
       apt:
         name: openjdk-11-jdk
