@@ -14,27 +14,32 @@
         name: openjdk-11-jdk
         state: present
 
+    #This will install the Maven 
     - name: Install Maven
       apt:
         name: maven
         state: present
 
+    #This runs and install jenkins through the given web url, and will ensures the destination of the key in the machine.
     - name: Download Jenkins repository key
       get_url:
         url: "https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key"
         dest: "/usr/share/keyrings/jenkins-keyring.asc"
         mode: '0644'
 
+    #This tells task will add jenkins repo in apt source list, ensures that each line is present if not then create"yes",         
     - name: Add Jenkins repository to sources.list.d
       lineinfile:
         path: "/etc/apt/sources.list.d/jenkins.list"
         line: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/"
         create: yes
 
+    #Update the package apt for the apt package, updates the cache and fetched the latest list from repo.
     - name: Update apt package cache
       apt:
         update_cache: yes
 
+    
     - name: Install Jenkins
       apt:
         name: jenkins

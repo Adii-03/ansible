@@ -1,4 +1,7 @@
 ---
+#We will execute all these playbooks in order.
 - import_playbook: jenkins-playbook.yaml
 - import_playbook: docker-playbook.yaml
 - import_playbook: kubernetes-playbook.yaml
+- import_playbook: prometheus-playbook.yaml
+- import_playbook: grafana-playbook.yaml
