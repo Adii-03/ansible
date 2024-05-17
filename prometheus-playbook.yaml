@@ -1,0 +1,24 @@
+---
+- name: Install and configure Prometheus
+  hosts: jenkins
+  become: yes
+  tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
+    - name: Install Prometheus
+      apt:
+        name: prometheus
+        state: present
+
+    - name: Install Prometheus Node Exporter
+      apt:
+        name: prometheus-node-exporter
+        state: present
+
+    - name: Ensure Prometheus service is enabled
+      systemd:
+        name: prometheus
+        enabled: yes
+        state: started
