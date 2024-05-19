@@ -48,7 +48,7 @@
     - name: Pull cAdvisor Docker image
       docker_image:
         name: gcr.io/cadvisor/cadvisor:v0.49.1
-        state: present
+        source: pull
 
     - name: Run cAdvisor Docker container
       docker_container:
