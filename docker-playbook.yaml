@@ -3,11 +3,6 @@
   hosts: all
   become: yes
   tasks:
-    - name: Add Docker's official GPG key
-      apt_key:
-        url: "https://download.docker.com/linux/ubuntu/gpg"
-        state: present
-
     - name: Install prerequisites
       apt:
         name: "{{ item }}"
@@ -34,22 +29,59 @@
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
         $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-      become: yes
+
     - name: Update apt packages
       apt:
         update_cache: yes
 
     - name: Install Docker packages
       apt:
-        name: "{{ item }}"
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
         state: present
-      with_items:
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-        - docker-buildx-plugin
-        - docker-compose-plugin
 
+    # Install cadvisor to expose metrics for prometheus
+    - name: Pull cAdvisor Docker image
+      docker_image:
+        name: gcr.io/cadvisor/cadvisor:v0.49.1
+        state: present
+
+    - name: Run cAdvisor Docker container
+      docker_container:
+        name: cadvisor
+        image: gcr.io/cadvisor/cadvisor:v0.49.1
+        volumes:
+          - "/:/rootfs:ro"
+          - "/var/run:/var/run:ro"
+          - "/sys:/sys:ro"
+          - "/var/lib/docker/:/var/lib/docker:ro"
+          - "/dev/disk/:/dev/disk:ro"
+        ports:
+          - "8080:8080"
+        detach: true
+        privileged: true
+        devices:
+          - "/dev/kmsg"
+
+    # Expose Docker node metrics as well for prometheus
+    - name: Create directory for Docker configuration
+      file:
+        path: /etc/docker
+        state: directory
+
+    - name: Create Docker daemon.json file
+      copy:
+        content: |
+          {
+            "metrics-addr": "127.0.0.1:9323"
+          }
+        dest: /etc/docker/daemon.json
+
+    # Create a Docker group to ensure that we are able to execute docker commands without sudo access
     - name: Create Docker group
       group:
         name: docker

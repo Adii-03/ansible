@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ratings-data-service
-        image: adrika1203/ratings-data-service:1.0  # Replace with your Docker image
+        image: adrika1203/ratings-data-service:1.0
         ports:
         - containerPort: 8083
 

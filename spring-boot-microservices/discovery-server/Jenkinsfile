@@ -12,9 +12,12 @@ pipeline {
     }
     stage('Build image') {
         steps{
+            // Switch directory to discovery server
             dir("spring-boot-microservices/discovery-server") {
                 script {
+                    // Run maven install to generate jar file in the target dir
                     sh "mvn clean install"
+                    // Build the docker image
                     dockerImage = docker.build(dockerimagename)
                 }
             }
@@ -26,16 +29,20 @@ pipeline {
         }
         steps{
             script {
+                // Login to Docker Hub using registryCredential env variable
                 docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
-                dockerImage.push()
+                   // Push the image to Docker Hub
+                   dockerImage.push()
                 }
             }
         }
     }
     stage('Deploying the container to Kubernetes') {
         steps {
+            // Change directory to discovery server
             dir("spring-boot-microservices/discovery-server") {
                 script {
+                    // Using the kubeconfig file, kubectl apply the manifest
                     withKubeConfig([credentialsId: 'kubernetes-creds', serverUrl: 'https://10.0.0.5:6443']) {
                         sh 'kubectl apply -f manifest.yaml'
                     }

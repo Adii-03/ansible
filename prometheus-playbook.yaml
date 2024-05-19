@@ -18,7 +18,12 @@
         state: present
 
     - name: Ensure Prometheus service is enabled
-      systemd:
+      service:
         name: prometheus
         enabled: yes
         state: started
+
+    - name: Copy prometheus.yml file
+      copy:
+        src: prometheus.yml
+        dest: /etc/prometheus/prometheus.yml

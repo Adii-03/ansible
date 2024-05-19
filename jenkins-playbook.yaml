@@ -20,7 +20,7 @@
         name: maven
         state: present
 
-    #This runs and install jenkins through the given web url, and will ensures the destination of the key in the machine.
+    #This dowanloads the jenkins repo validation key
     - name: Download Jenkins repository key
       get_url:
         url: "https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key"
@@ -54,15 +54,7 @@
     - name: Download kubectl binary
       get_url:
         url: "https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl"
-        dest: "/tmp/kubectl"
-        mode: '0644'
-
-    - name: Make kubectl executable
-      file:
-        path: "/tmp/kubectl"
+        dest: "/usr/bin/kubectl"
         mode: '0755'
-
-    - name: Move kubectl to /usr/bin
-      command: mv /tmp/kubectl /usr/bin/kubectl
       args:
         creates: /usr/bin/kubectl

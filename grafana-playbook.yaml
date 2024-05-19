@@ -3,6 +3,10 @@
   hosts: jenkins
   become: yes
   tasks:
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+
     - name: Install dependencies
       apt:
         name:
@@ -10,7 +14,6 @@
           - software-properties-common
           - wget
         state: present
-        update_cache: yes
 
     - name: Create directory for APT keyrings
       file:
@@ -20,7 +23,6 @@
 
     - name: Import the GPG key
       shell: |
-        sudo mkdir -p /etc/apt/keyrings/
         wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null 
 
     - name: Add Grafana APT repository

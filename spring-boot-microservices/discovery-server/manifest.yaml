@@ -4,14 +4,17 @@ metadata:
   name: discovery-server
 spec:
   replicas: 1
+  # Manage Pods with the following selector
   selector:
     matchLabels:
       app: discovery-server
+  # Define the Pod template
   template:
     metadata:
       labels:
         app: discovery-server
     spec:
+      # Define containers with the following spec
       containers:
       - name: discovery-server
         image: adrika1203/discovery-server:1.0
@@ -19,14 +22,18 @@ spec:
         - containerPort: 8761
 
 ---
+# Expose the Pod using a Service resource
 apiVersion: v1
 kind: Service
 metadata:
   name: discovery-server-service
 spec:
+  # Target all Pods with the following selector
   selector:
     app: discovery-server
   ports:
     - protocol: TCP
+      # Port that service listens on
       port: 8761
+      # Port that the pod listens on
       targetPort: 8761
