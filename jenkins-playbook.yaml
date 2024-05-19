@@ -51,10 +51,15 @@
         state: started
         enabled: yes
 
+    - name: Check if Kubectl exists
+      stat:
+        path: /usr/bin/kubectl
+      register: kubectl
+      become: yes
+
     - name: Download kubectl binary
       get_url:
         url: "https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl"
         dest: "/usr/bin/kubectl"
         mode: '0755'
-      args:
-        creates: /usr/bin/kubectl
+      when: not kubectl.stat.exists
