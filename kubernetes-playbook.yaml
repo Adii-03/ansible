@@ -9,13 +9,12 @@
 
     - name: Install apt-transport-https, ca-certificates, curl, and gpg
       apt:
-        name: "{{ item }}"
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg 
         state: present
-      with_items:
-        - apt-transport-https
-        - ca-certificates
-        - curl
-        - gnupg
       become: yes
 
     - name: Check if Kubernetes GPG key exists
@@ -44,12 +43,11 @@
 
     - name: Install kubelet, kubeadm, kubectl
       apt:
-        name: "{{ item }}"
+        name: 
+          - kubelet
+          - kubeadm
+          - kubectl
         state: present
-      with_items:
-        - kubelet
-        - kubeadm
-        - kubectl
       become: yes
 
     - name: Set SystemdCgroup property in Containerd config
@@ -70,7 +68,7 @@
         var: lineinfile_result
 
     - name: Restart Containerd service
-      systemd:
+      service:
         name: containerd
         state: restarted
       become: yes
@@ -96,10 +94,12 @@
       args:
         creates: $HOME/.kube/config
 
-    - name: Install a pod network add-on (e.g., Calico)
+    # Install an overlay network add-on so that containers in different nodes can talk to each other
+    - name: Install a pod network add-on
       command: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
       when: kubeadm_output is succeeded
 
+    # Normally the control-plane node cannot run containers because of a taint, remove it
     - name: Allow the control-plane node to run containers
       command: kubectl taint node idop-vm-02 node-role.kubernetes.io/control-plane:NoSchedule-
       when: kubeadm_output is succeeded

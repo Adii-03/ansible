@@ -40,6 +40,11 @@
         name: grafana
         state: present
 
+    - name: Copy grafana.ini file
+      copy:
+        src: grafana.ini
+        dest: /etc/grafana/grafana.ini
+
     - name: Ensure Grafana service is enabled and started
       systemd:
         name: grafana-server
